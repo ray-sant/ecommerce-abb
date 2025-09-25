@@ -1,0 +1,148 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+typedef struct {
+    int codigo;
+    char nome[50];
+    float preco;
+    int estoque;
+} Produto;
+
+
+typedef struct No {
+    Produto p;
+    struct No *esq;
+    struct No *dir;
+} No;
+
+
+No* criarNo(Produto p) {
+    No* novo = (No*)malloc(sizeof(No));
+    if (!novo) {
+        printf("Erro de memória!\n");
+        exit(1);
+    }
+    novo->p = p;
+    novo->esq = novo->dir = NULL;
+    return novo;
+}
+
+
+No* inserirPorCodigo(No* raiz, Produto p) {
+    if (raiz == NULL) return criarNo(p);
+
+    if (p.codigo < raiz->p.codigo)
+        raiz->esq = inserirPorCodigo(raiz->esq, p);
+    else if (p.codigo > raiz->p.codigo)
+        raiz->dir = inserirPorCodigo(raiz->dir, p);
+    else
+        printf("Produto com código %d já existe!\n", p.codigo);
+
+    return raiz;
+}
+
+
+No* buscarPorCodigo(No* raiz, int codigo) {
+    if (raiz == NULL || raiz->p.codigo == codigo)
+        return raiz;
+    if (codigo < raiz->p.codigo)
+        return buscarPorCodigo(raiz->esq, codigo);
+    return buscarPorCodigo(raiz->dir, codigo);
+}
+
+
+No* inserirPorPreco(No* raiz, Produto p) {
+    if (raiz == NULL) return criarNo(p);
+
+    if (p.preco < raiz->p.preco)
+        raiz->esq = inserirPorPreco(raiz->esq, p);
+    else if (p.preco > raiz->p.preco)
+        raiz->dir = inserirPorPreco(raiz->dir, p);
+    else
+        printf("Produto com preço %.2f já existe!\n", p.preco);
+
+    return raiz;
+}
+
+
+No* buscarPorPreco(No* raiz, float preco) {
+    if (raiz == NULL || raiz->p.preco == preco)
+        return raiz;
+    if (preco < raiz->p.preco)
+        return buscarPorPreco(raiz->esq, preco);
+    return buscarPorPreco(raiz->dir, preco);
+}
+
+
+No* inserirPorNome(No* raiz, Produto p) {
+    if (raiz == NULL) return criarNo(p);
+
+    int cmp = strcmp(p.nome, raiz->p.nome);
+    if (cmp < 0)
+        raiz->esq = inserirPorNome(raiz->esq, p);
+    else if (cmp > 0)
+        raiz->dir = inserirPorNome(raiz->dir, p);
+    else
+        printf("Produto com nome \"%s\" já existe!\n", p.nome);
+
+    return raiz;
+}
+
+
+No* buscarPorNome(No* raiz, char* nome) {
+    if (raiz == NULL || strcmp(raiz->p.nome, nome) == 0)
+        return raiz;
+    if (strcmp(nome, raiz->p.nome) < 0)
+        return buscarPorNome(raiz->esq, nome);
+    return buscarPorNome(raiz->dir, nome);
+}
+
+
+void imprimirEmOrdem(No* raiz) {
+    if (raiz != NULL) {
+        imprimirEmOrdem(raiz->esq);
+        printf("Código: %d | Nome: %s | Preço: %.2f | Estoque: %d\n",
+               raiz->p.codigo, raiz->p.nome, raiz->p.preco, raiz->p.estoque);
+        imprimirEmOrdem(raiz->dir);
+    }
+}
+
+int main() {
+    No* arvoreCodigo = NULL;
+    No* arvorePreco  = NULL;
+    No* arvoreNome   = NULL;
+    No* carrinho     = NULL; 
+
+    Produto p1 = {3, "Camisa", 79.90, 10};
+    Produto p2 = {1, "Tenis", 199.99, 5};
+    Produto p3 = {2, "Calça", 149.50, 8};
+
+
+    arvoreCodigo = inserirPorCodigo(arvoreCodigo, p1);
+    arvoreCodigo = inserirPorCodigo(arvoreCodigo, p2);
+    arvoreCodigo = inserirPorCodigo(arvoreCodigo, p3);
+
+    arvorePreco = inserirPorPreco(arvorePreco, p1);
+    arvorePreco = inserirPorPreco(arvorePreco, p2);
+    arvorePreco = inserirPorPreco(arvorePreco, p3);
+
+    arvoreNome = inserirPorNome(arvoreNome, p1);
+    arvoreNome = inserirPorNome(arvoreNome, p2);
+    arvoreNome = inserirPorNome(arvoreNome, p3);
+
+
+    printf("\nProdutos ordenados por CÓDIGO:\n");
+    imprimirEmOrdem(arvoreCodigo);
+
+    printf("\nProdutos ordenados por PREÇO:\n");
+    imprimirEmOrdem(arvorePreco);
+
+    printf("\nProdutos ordenados por NOME:\n");
+    imprimirEmOrdem(arvoreNome);
+
+    printf("\nCarrinho ainda está vazio.\n");
+
+    return 0;
+}
